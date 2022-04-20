@@ -1,14 +1,18 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import logo from "./logo.svg";
+import "./App.css";
 
-function App() {
+interface AppProps {
+  name: string;
+}
+
+const App: React.FC<AppProps> = (props) => {
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.tsx</code> and save to reload.
+          Edit <code>src/App.tsx</code> and save to reload {props.name}.
         </p>
         <a
           className="App-link"
@@ -21,6 +25,6 @@ function App() {
       </header>
     </div>
   );
-}
+};
 
 export default App;
