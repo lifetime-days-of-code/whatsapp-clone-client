@@ -1,9 +1,7 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import moment from 'moment';
-import { chats } from '../../db';
 import { List, ListItem } from "@material-ui/core";
 import styled from 'styled-components';
-
 
 const Container = styled.section`
   height: 100%;
@@ -58,26 +56,59 @@ const MessageDate = styled.p`
   font-size: 13px;
 `;
 
-const ChatList: React.FC = () => (
-  <Container>
-    <StyledList>
-      {chats.map(chat => (
-        <StyledListItem key={chat.id} button>
-          <ChatPicture src={chat.picture} alt="Profile" />
-          <ChatInfo>
-            <ChatName>{chat.name}</ChatName>
-            {chat.lastMessage && (
-              <>
-                <MessageContent>{chat.lastMessage?.content}</MessageContent>
-                <MessageDate>{moment(chat.lastMessage.createdAt).format('HH:mm')}</MessageDate>
-              </>
-            )}
-          </ChatInfo>
-        </StyledListItem>
-      ))}
-    </StyledList>
-  </Container>
-)
+const getChatsQuery = `
+  query GetChats {
+    chats {
+      id
+      name
+      picture
+      lastMessage {
+        id
+        content
+        createdAt
+      }
+    }
+  }
+`;
+
+const ChatList: React.FC = () => {
+
+  const [chats, setChats] = useState<any[]>([]);
+
+  useMemo(async () => {
+    const body = await fetch(`${process.env.REACT_APP_SERVER_URL}/graphql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: getChatsQuery }),
+    });
+    const { data: { chats } } = await body.json();
+    setChats(chats);
+    console.log(chats)
+  }, []);
+
+  return (
+    <Container>
+      <StyledList>
+        {chats.map(chat => (
+          <StyledListItem key={chat.id} button>
+            <ChatPicture src={chat.picture} alt="Profile" />
+            <ChatInfo>
+              <ChatName>{chat.name}</ChatName>
+              {chat.lastMessage && (
+                <>
+                  <MessageContent>{chat.lastMessage?.content}</MessageContent>
+                  <MessageDate>{moment(chat.lastMessage.createdAt).format('HH:mm')}</MessageDate>
+                </>
+              )}
+            </ChatInfo>
+          </StyledListItem>
+        ))}
+      </StyledList>
+    </Container>
+  )
+}
 
 
 export default ChatList;
